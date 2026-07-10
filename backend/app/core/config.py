@@ -9,6 +9,11 @@ class Settings(BaseSettings):
 
     secret_key: str
 
+    # JWT
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+
+    # Database
     database_host: str
     database_port: int
     database_name: str
