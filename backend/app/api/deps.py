@@ -8,8 +8,11 @@ from app.db.database import SessionLocal
 from app.models.user import User
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
-
+#oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/api/v1/auth/login",
+    scheme_name="BearerAuth",
+)
 
 def get_db():
     db = SessionLocal()

@@ -51,4 +51,22 @@ class Image(Base):
         nullable=False,
     )
 
-    owner = relationship("User", back_populates="images")
+    owner = relationship(
+        "User",
+        back_populates="images",
+    )
+
+    width: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    height: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    image_format: Mapped[str | None] = mapped_column(
+        String(20),
+        nullable=True,
+    )
