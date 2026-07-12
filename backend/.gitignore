@@ -18,6 +18,15 @@ venv/
 # Logs
 *.log
 
+# SSL Certificates
+nginx/ssl/
+
+# Database dumps
+*.sql
+
+# MySQL data
+mysql_data/
+
 # Database
 *.db
 
