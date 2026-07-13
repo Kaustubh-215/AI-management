@@ -4,7 +4,7 @@ from app.api.health import router as health_router
 from app.api.v1.api import api_router
 
 app = FastAPI(
-    title="AI Image Management API",
+    title="AI Images Management API",
     version="1.0.0",
     description="Backend API for AI Image Management System",
 )
