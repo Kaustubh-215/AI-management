@@ -20,13 +20,15 @@ services:
       - "3306"
 
   backend:
-
     build: .
 
     container_name: ai-backend
 
     env_file:
       - .env
+
+    volumes:
+      - .:/app
 
     expose:
       - "8000"
@@ -37,7 +39,6 @@ services:
     restart: always
 
   nginx:
-
     image: nginx:latest
 
     container_name: ai-nginx
@@ -49,6 +50,7 @@ services:
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
       - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/html:/usr/share/nginx/html:ro
 
     depends_on:
       - backend

@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
-class ImageCreate(BaseModel):
+class ImageBase(BaseModel):
     filename: str
     original_filename: str
     file_path: str
@@ -14,19 +14,22 @@ class ImageCreate(BaseModel):
     height: int | None = None
     image_format: str | None = None
 
+    file_category: str | None = None
 
-class ImageResponse(BaseModel):
+    ai_status: str | None = None
+    ai_summary: str | None = None
+    ai_tags: str | None = None
+
+
+class ImageCreate(ImageBase):
+    pass
+
+
+class ImageResponse(ImageBase):
     id: int
-    filename: str
-    original_filename: str
-    file_size: int
-    mime_type: str
-
-    width: int | None = None
-    height: int | None = None
-    image_format: str | None = None
-
+    owner_id: int
     uploaded_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True
+    )

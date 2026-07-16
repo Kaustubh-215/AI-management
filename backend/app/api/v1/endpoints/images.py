@@ -21,6 +21,7 @@ from app.schemas.image import (
     ImageCreate,
     ImageResponse,
 )
+from app.services.ai import analyze_file
 from app.services.s3 import (
     upload_file_to_s3,
     generate_presigned_url,
@@ -33,9 +34,51 @@ router = APIRouter(
 )
 
 ALLOWED_TYPES = [
+
+    # Images
+
     "image/jpeg",
     "image/png",
     "image/webp",
+    "image/gif",
+
+    # PDF / Documents
+
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+
+    # Excel
+
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+    # CSV / TSV
+
+    "text/csv",
+    "text/tab-separated-values",
+    "application/csv",
+
+    # Text
+
+    "text/plain",
+
+    # ZIP / Archive
+
+    "application/zip",
+    "application/x-zip-compressed",
+
+    # Video
+
+    "video/mp4",
+    "video/mpeg",
+    "video/quicktime",
+
+    # Audio
+
+    "audio/mpeg",
+    "audio/mp3",
+    "audio/wav",
 ]
 
 
@@ -50,12 +93,32 @@ def upload_image(
 ):
 
     if file.content_type not in ALLOWED_TYPES:
+
         raise HTTPException(
             status_code=400,
-            detail="Invalid image type",
+            detail=f"Unsupported file type: {file.content_type}",
         )
 
-    metadata = extract_metadata(file)
+    metadata = {
+        "width": None,
+        "height": None,
+        "format": None,
+    }
+
+    # Extract metadata only for images
+
+    if file.content_type.startswith("image/"):
+
+        metadata = extract_metadata(file)
+
+    # AI analysis
+
+    ai_data = analyze_file(
+        filename=file.filename,
+        mime_type=file.content_type,
+    )
+
+    # Upload to S3
 
     filename, file_url = upload_file_to_s3(file)
 
@@ -65,9 +128,15 @@ def upload_image(
         file_path=file_url,
         file_size=0,
         mime_type=file.content_type,
+
         width=metadata["width"],
         height=metadata["height"],
         image_format=metadata["format"],
+
+        file_category=ai_data["file_category"],
+        ai_status=ai_data["ai_status"],
+        ai_summary=ai_data["ai_summary"],
+        ai_tags=ai_data["ai_tags"],
     )
 
     return create_image(
@@ -100,15 +169,17 @@ def get_image(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+
     image = get_image_by_id(
         db,
         image_id,
     )
 
     if image is None or image.owner_id != current_user.id:
+
         raise HTTPException(
             status_code=404,
-            detail="Image not found",
+            detail="File not found",
         )
 
     return image
@@ -120,15 +191,17 @@ def download_image(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+
     image = get_image_by_id(
         db,
         image_id,
     )
 
     if image is None or image.owner_id != current_user.id:
+
         raise HTTPException(
             status_code=404,
-            detail="Image not found",
+            detail="File not found",
         )
 
     download_url = generate_presigned_url(
@@ -146,15 +219,17 @@ def remove_image(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+
     image = get_image_by_id(
         db,
         image_id,
     )
 
     if image is None or image.owner_id != current_user.id:
+
         raise HTTPException(
             status_code=404,
-            detail="Image not found",
+            detail="File not found",
         )
 
     delete_image(
@@ -163,5 +238,5 @@ def remove_image(
     )
 
     return {
-        "message": "Image deleted successfully"
+        "message": "File deleted successfully",
     }
