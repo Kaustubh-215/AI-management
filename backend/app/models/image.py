@@ -58,6 +58,7 @@ class Image(Base):
 
     owner_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"),
+        nullable=False,
     )
 
     width: Mapped[int | None] = mapped_column(

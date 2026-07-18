@@ -7,7 +7,7 @@ COPY requirements.txt .
 RUN pip install \
     --no-cache-dir \
     --retries 10 \
-    --timeout 300 \ 
+    --timeout 300 \
     -r requirements.txt
 
 COPY . .

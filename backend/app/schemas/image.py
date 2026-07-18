@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -10,15 +11,15 @@ class ImageBase(BaseModel):
     file_size: int
     mime_type: str
 
-    width: int | None = None
-    height: int | None = None
-    image_format: str | None = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+    image_format: Optional[str] = None
 
-    file_category: str | None = None
+    file_category: Optional[str] = None
 
-    ai_status: str | None = None
-    ai_summary: str | None = None
-    ai_tags: str | None = None
+    ai_status: Optional[str] = "pending"
+    ai_summary: Optional[str] = None
+    ai_tags: Optional[str] = None
 
 
 class ImageCreate(ImageBase):

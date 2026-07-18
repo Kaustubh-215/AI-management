@@ -16,14 +16,24 @@ def create_image(
         file_path=image.file_path,
         file_size=image.file_size,
         mime_type=image.mime_type,
+
         owner_id=owner_id,
+
         width=image.width,
         height=image.height,
         image_format=image.image_format,
+
+        file_category=image.file_category,
+
+        ai_status=image.ai_status,
+        ai_summary=image.ai_summary,
+        ai_tags=image.ai_tags,
     )
 
     db.add(db_image)
+
     db.commit()
+
     db.refresh(db_image)
 
     return db_image
@@ -56,13 +66,11 @@ def delete_image(
     db: Session,
     image: Image,
 ):
-    """
-    Delete image from S3 and remove its database record.
-    """
-
     delete_file_from_s3(
         image.filename
     )
 
     db.delete(image)
+
     db.commit()
+
