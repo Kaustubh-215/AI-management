@@ -1,9 +1,12 @@
+from typing import List
+
 from fastapi import (
     APIRouter,
     Depends,
     File,
     HTTPException,
     UploadFile,
+    Body,
 )
 
 from fastapi.responses import RedirectResponse
@@ -88,22 +91,11 @@ ALLOWED_TYPES = [
 ]
 
 
-@router.post(
-    "/upload",
-    response_model=ImageResponse,
-)
-def upload_image(
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+def process_file(
+    file: UploadFile,
+    db: Session,
+    current_user: User,
 ):
-
-    if file.content_type not in ALLOWED_TYPES:
-
-        raise HTTPException(
-            status_code=400,
-            detail=f"Unsupported file type: {file.content_type}",
-        )
 
     metadata = {
         "width": None,
@@ -144,6 +136,94 @@ def upload_image(
     )
 
 
+@router.post(
+    "/upload",
+    response_model=ImageResponse,
+)
+def upload_image(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+
+    if file.content_type not in ALLOWED_TYPES:
+
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type: {file.content_type}",
+        )
+
+    return process_file(
+        file=file,
+        db=db,
+        current_user=current_user,
+    )
+
+
+@router.post("/upload-multiple")
+def upload_multiple_files(
+    files: List[UploadFile] = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+
+    uploaded_files = []
+
+    for file in files:
+
+        if file.content_type not in ALLOWED_TYPES:
+            continue
+
+        saved = process_file(
+            file=file,
+            db=db,
+            current_user=current_user,
+        )
+
+        uploaded_files.append(saved)
+
+    return {
+        "count": len(uploaded_files),
+        "files": uploaded_files,
+    }
+
+
+@router.post("/bulk-delete")
+def bulk_delete(
+    payload: dict = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+
+    image_ids = payload["image_ids"]
+
+    deleted = 0
+
+    for image_id in image_ids:
+
+        image = get_image_by_id(
+            db,
+            image_id,
+        )
+
+        if (
+            image
+            and image.owner_id
+            == current_user.id
+        ):
+
+            delete_image(
+                db,
+                image,
+            )
+
+            deleted += 1
+
+    return {
+        "deleted": deleted,
+    }
+
+
 @router.get(
     "",
     response_model=list[ImageResponse],
@@ -152,6 +232,7 @@ def list_images(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+
     return get_images_by_owner(
         db,
         current_user.id,
