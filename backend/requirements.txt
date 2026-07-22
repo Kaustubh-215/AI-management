@@ -43,3 +43,4 @@ Pillow
 PyMuPDF
 pandas
 python-docx
+prometheus-fastapi-instrumentator

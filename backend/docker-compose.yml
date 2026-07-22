@@ -59,8 +59,14 @@ services:
 
     container_name: ai-prometheus
 
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
+
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.route-prefix=/prometheus"
+      - "--web.external-url=https://54.68.149.130.nip.io/prometheus"
 
     volumes:
       - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
@@ -72,8 +78,12 @@ services:
 
     container_name: ai-grafana
 
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
+
+    environment:
+      GF_SERVER_ROOT_URL: https://54.68.149.130.nip.io/grafana
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
 
     volumes:
       - grafana_data:/var/lib/grafana
@@ -86,8 +96,8 @@ services:
 
     container_name: ai-loki
 
-    ports:
-      - "3100:3100"
+    expose:
+      - "3100"
 
     command:
       - "-config.file=/etc/loki/loki-config.yml"
@@ -120,10 +130,10 @@ services:
 
     container_name: ai-tempo
 
-    ports:
-      - "3200:3200"
-      - "4317:4317"
-      - "4318:4318"
+    expose:
+      - "3200"
+      - "4317"
+      - "4318"
 
     command:
       - "-config.file=/etc/tempo/tempo.yml"

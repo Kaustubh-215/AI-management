@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.api.health import router as health_router
 from app.api.v1.api import api_router
@@ -10,11 +11,14 @@ app = FastAPI(
     description="Backend API for AI Image Management System",
 )
 
+# Enable Prometheus metrics
+Instrumentator().instrument(app).expose(app)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://34.212.58.132:5173",
-        "https://34.212.58.132.nip.io",
+        "http://54.68.149.130:5173",
+        "https://54.68.149.130.nip.io",
     ],
     allow_credentials=True,
     allow_methods=["*"],
