@@ -19,24 +19,21 @@ services:
     expose:
       - "3306"
 
-  backend:
-    build: .
+ backend:
+  image: kaustubhsnehu/ai-image-backend:latest
 
-    container_name: ai-backend
+  container_name: ai-backend
 
-    env_file:
-      - .env
+  env_file:
+    - .env
 
-    volumes:
-      - .:/app
+  expose:
+    - "8000"
 
-    expose:
-      - "8000"
+  depends_on:
+    - mysql
 
-    depends_on:
-      - mysql
-
-    restart: always
+  restart: always
 
   nginx:
     image: nginx:latest
