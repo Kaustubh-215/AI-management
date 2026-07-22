@@ -19,21 +19,21 @@ services:
     expose:
       - "3306"
 
- backend:
-  image: kaustubhsnehu/ai-image-backend:latest
+  backend:
+    image: kaustubhsnehu/ai-image-backend:latest
 
-  container_name: ai-backend
+    container_name: ai-backend
 
-  env_file:
-    - .env
+    env_file:
+      - .env
 
-  expose:
-    - "8000"
+    expose:
+      - "8000"
 
-  depends_on:
-    - mysql
+    depends_on:
+      - mysql
 
-  restart: always
+    restart: always
 
   nginx:
     image: nginx:latest
@@ -102,13 +102,13 @@ services:
 
     container_name: ai-promtail
 
+    command:
+      - "-config.file=/etc/promtail/promtail-config.yml"
+
     volumes:
       - ../monitoring/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
-
-    command:
-      - "-config.file=/etc/promtail/promtail-config.yml"
 
     depends_on:
       - loki
